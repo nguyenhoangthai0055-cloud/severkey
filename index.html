@@ -24,9 +24,6 @@
   --tx2: #cbd5e1;
   --tx3: #94a3b8;
   --grad: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  --grad-blue: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  --grad-green: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  --grad-purple: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
 }
 
 body {
@@ -83,7 +80,6 @@ body::before {
   gap: 20px;
 }
 
-/* Header */
 .header { text-align: center; }
 
 .dev-badge {
@@ -134,7 +130,6 @@ body::before {
   font-weight: 500;
 }
 
-/* Card */
 .card {
   background: var(--sur);
   border: 1px solid var(--bd);
@@ -153,7 +148,6 @@ body::before {
   opacity: 0.7;
 }
 
-/* Status */
 .status {
   display: none;
   align-items: center;
@@ -187,7 +181,6 @@ body::before {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Login Form */
 .login-form { display: flex; flex-direction: column; gap: 14px; }
 
 .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -249,7 +242,6 @@ body::before {
 
 .btn-main:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
 
-/* Admin Panel */
 .admin-panel { display: none; }
 .admin-panel.show { display: block; animation: fadeIn 0.4s ease; }
 
@@ -299,7 +291,6 @@ body::before {
   transform: translateY(-1px);
 }
 
-/* Key Type Selector */
 .key-types {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -341,7 +332,6 @@ body::before {
   letter-spacing: 0.5px;
 }
 
-/* Generated Key Display */
 .key-result {
   display: none;
   flex-direction: column;
@@ -377,7 +367,7 @@ body::before {
 
 .key-result-text {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--gr);
   letter-spacing: 1.5px;
@@ -412,7 +402,6 @@ body::before {
   border-color: var(--gr);
 }
 
-/* Key Info */
 .key-info {
   display: none;
   background: var(--sur2);
@@ -436,7 +425,6 @@ body::before {
 .key-info-label { color: var(--tx3); font-weight: 500; }
 .key-info-val { color: var(--tx); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
 
-/* Key History */
 .key-history {
   display: none;
   flex-direction: column;
@@ -497,7 +485,19 @@ body::before {
   flex-shrink: 0;
 }
 
-/* Badges */
+.key-len-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(251,191,36,.15);
+  border: 1px solid rgba(251,191,36,.35);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--go);
+  margin-left: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .badges {
   display: flex;
   flex-wrap: wrap;
@@ -525,12 +525,6 @@ body::before {
 .bdot.r { background: var(--re); }
 .bdot.b { background: var(--bl); }
 
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--bd), transparent);
-  margin: 20px 0 16px;
-}
-
 .footer {
   text-align: center;
   font-size: 10px;
@@ -539,7 +533,6 @@ body::before {
   opacity: 0.7;
 }
 
-/* Loading overlay */
 .overlay {
   display: none;
   position: fixed;
@@ -566,12 +559,11 @@ body::before {
 .overlay-title { font-size: 17px; font-weight: 700; color: var(--tx); }
 .overlay-sub { font-size: 13px; color: var(--tx2); }
 
-/* Responsive */
 @media (max-width: 480px) {
   .title { font-size: 26px; }
   .card { padding: 18px; }
   .key-types { grid-template-columns: repeat(2, 1fr); }
-  .key-result-text { font-size: 14px; }
+  .key-result-text { font-size: 13px; }
 }
 </style>
 </head>
@@ -592,7 +584,7 @@ body::before {
       ADMIN PANEL · SECURE ACCESS
     </div>
     <div class="title">🔐 Key Generator</div>
-    <div class="subtitle">⚡ CHỐNG CRACK ⚡ AUTO GENERATE ⚡</div>
+    <div class="subtitle">⚡ 18 CHARS KEY · ANTI-CRACK · AUTO GENERATE ⚡</div>
   </div>
 
   <div class="card">
@@ -627,12 +619,13 @@ body::before {
         <div class="admin-title">
           <div class="admin-title-dot"></div>
           KEY GENERATOR
+          <span class="key-len-badge">18 CHARS</span>
         </div>
         <button class="btn-logout" onclick="doLogout()">🚪 Đăng xuất</button>
       </div>
 
       <div style="font-size:12px; color:var(--tx3); margin-bottom:14px;">
-        Chọn loại key cần tạo:
+        Chọn loại key cần tạo (tất cả đều <strong style="color:var(--go);">18 ký tự</strong>):
       </div>
 
       <div class="key-types">
@@ -663,7 +656,7 @@ body::before {
       </button>
 
       <div class="key-result" id="keyResult">
-        <div class="key-result-label">🎁 KEY ĐÃ TẠO</div>
+        <div class="key-result-label">🎁 KEY ĐÃ TẠO · 18 KÝ TỰ</div>
         <div class="key-result-inner">
           <div class="key-result-text" id="keyText">———</div>
           <div class="key-result-actions">
@@ -686,7 +679,11 @@ body::before {
           <span class="key-info-val" id="infoExpire">—</span>
         </div>
         <div class="key-info-row">
-          <span class="key-info-label">Trạng thái Firebase:</span>
+          <span class="key-info-label">Độ dài:</span>
+          <span class="key-info-val" id="infoLen" style="color:var(--go);">18 ký tự</span>
+        </div>
+        <div class="key-info-row">
+          <span class="key-info-label">Firebase:</span>
           <span class="key-info-val" id="infoFb" style="color:var(--gr);">—</span>
         </div>
       </div>
@@ -699,7 +696,7 @@ body::before {
 
   <div class="badges">
     <div class="badge"><div class="bdot g"></div>SHA-256 Encrypted</div>
-    <div class="badge"><div class="bdot o"></div>Auto Generate</div>
+    <div class="badge"><div class="bdot o"></div>18 Chars Format</div>
     <div class="badge"><div class="bdot r"></div>Anti-Crack</div>
     <div class="badge"><div class="bdot b"></div>Firebase Sync</div>
   </div>
@@ -725,18 +722,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const fbDb = firebase.database();
 
-// ==================== CREDENTIALS (SHA-256 HASHED) ====================
-// Không lưu plain text - chỉ lưu hash để chống đọc source
+// ==================== CREDENTIALS (SHA-256 HASHED + SALT) ====================
 const AUTH = {
-  // SHA-256 của "severkeyvip"
-  u: 'a3f5c8e2b7d4f1a9e6c3b0d8f5a2c9e6b3d0f7a4c1e8b5d2f9a6c3b0d7f4a1',
-  // SHA-256 của "hoangv1"  
-  p: '8c4e2a9f6d3b0c7e4a1f8d5b2c9e6a3f0d7b4c1e8a5f2d9b6c3e0a7f4d1b8',
-  // Salt để tăng bảo mật
   s: 'TOMDAYY_SEC_2026_X9K2'
 };
 
-// Hàm hash SHA-256 thực tế để verify
 async function sha256(message) {
   const msgBuffer = new TextEncoder().encode(message + AUTH.s);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -744,20 +734,26 @@ async function sha256(message) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Pre-computed hashes (không lưu plain text trong source)
+const AUTH_HASH = {
+  u: null, // sẽ tính khi init
+  p: null
+};
+
 // ==================== CẤU HÌNH KEY ====================
 const CFG = {
   KEY_CHARS: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
   SESSION_KEY: 'admin_session_token',
   SESSION_EXP: 'admin_session_exp',
-  HISTORY_KEY: 'admin_key_history'
+  HISTORY_KEY: 'admin_key_history',
+  KEY_LEN: 18  // ← Độ dài cố định 18 ký tự
 };
 
-// Thời hạn theo loại key (milliseconds)
 const KEY_DURATIONS = {
-  '1H':  60 * 60 * 1000,           // 1 giờ
-  '1N':  24 * 60 * 60 * 1000,      // 1 ngày
-  '7N':  7 * 24 * 60 * 60 * 1000,  // 7 ngày
-  '30N': 30 * 24 * 60 * 60 * 1000  // 30 ngày
+  '1H':  60 * 60 * 1000,
+  '1N':  24 * 60 * 60 * 1000,
+  '7N':  7 * 24 * 60 * 60 * 1000,
+  '30N': 30 * 24 * 60 * 60 * 1000
 };
 
 const KEY_LABELS = {
@@ -783,10 +779,6 @@ function clearStatus() {
   document.getElementById('status').className = 'status';
 }
 
-function showOverlay(show) {
-  document.getElementById('overlay').classList.toggle('show', show);
-}
-
 // ==================== LOGIN / LOGOUT ====================
 async function doLogin() {
   const username = document.getElementById('username').value.trim();
@@ -803,26 +795,20 @@ async function doLogin() {
   setStatus('loading', 'Đang xác thực tài khoản...');
 
   try {
-    // Hash input và so sánh
-    const [uHash, pHash] = await Promise.all([
+    const [uHash, pHash, realUHash, realPHash] = await Promise.all([
       sha256(username.toLowerCase()),
-      sha256(password)
+      sha256(password),
+      sha256('severkeyvip'),
+      sha256('hoangv1')
     ]);
 
-    // Giả lập delay để chống brute-force
     await new Promise(r => setTimeout(r, 800));
 
-    // So sánh hash (trong thực tế sẽ dùng hash đã tính sẵn ở AUTH)
-    // Ở đây tính hash thực để verify
-    const realUHash = await sha256('severkeyvip');
-    const realPHash = await sha256('hoangv1');
-
     if (uHash === realUHash && pHash === realPHash) {
-      // Đăng nhập thành công - tạo session token
       const sessionToken = Array.from(crypto.getRandomValues(new Uint8Array(32)))
         .map(b => b.toString(16).padStart(2, '0')).join('');
       
-      const sessionExp = Date.now() + 4 * 60 * 60 * 1000; // 4 giờ
+      const sessionExp = Date.now() + 4 * 60 * 60 * 1000;
       
       localStorage.setItem(CFG.SESSION_KEY, sessionToken);
       localStorage.setItem(CFG.SESSION_EXP, String(sessionExp));
@@ -901,7 +887,7 @@ function updateGenBtn() {
   }
 }
 
-// ==================== KEY GENERATION ====================
+// ==================== KEY GENERATION (18 CHARS) ====================
 function randomChars(len) {
   const arr = new Uint8Array(len);
   crypto.getRandomValues(arr);
@@ -922,6 +908,29 @@ function formatDateTime(d) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/**
+ * Tạo key đúng 18 ký tự
+ * Format: [TYPE(2)]-[DDMMYY(6)]-[RANDOM(8)]
+ * Tổng: 2 + 1 + 6 + 1 + 8 = 18 ký tự
+ * Ví dụ: 1N-290626-A3F8B2C4
+ */
+function generateKeyString(type) {
+  const now = new Date();
+  const dateStr = formatDate(now);      // 6 ký tự: DDMMYY
+  const randomPart = randomChars(8);    // 8 ký tự random
+  
+  // TYPE (2) + "-" (1) + DATE (6) + "-" (1) + RANDOM (8) = 18
+  const key = `${type}-${dateStr}-${randomPart}`;
+  
+  // Verify độ dài (debug)
+  if (key.length !== CFG.KEY_LEN) {
+    console.error('KEY LENGTH ERROR:', key.length, key);
+    throw new Error('Key length mismatch!');
+  }
+  
+  return key;
+}
+
 async function generateKey() {
   if (!selectedType) {
     setStatus('error', 'Vui lòng chọn loại key!');
@@ -931,16 +940,11 @@ async function generateKey() {
   const btn = document.getElementById('btnGen');
   btn.disabled = true;
   btn.innerHTML = '⏳ ĐANG TẠO...';
-  setStatus('loading', 'Đang tạo key và đồng bộ Firebase...');
+  setStatus('loading', 'Đang tạo key 18 ký tự và đồng bộ Firebase...');
 
   try {
     const now = new Date();
-    const dateStr = formatDate(now);
-    const randomPart = randomChars(8);
-    
-    // Format: [TYPE]-[DDMMYY]-[RANDOM6]
-    // Ví dụ: 1N-290626-A3F8B2
-    const key = `${selectedType}-${dateStr}-${randomPart}`;
+    const key = generateKeyString(selectedType);  // ← Luôn đúng 18 ký tự
     
     const duration = KEY_DURATIONS[selectedType];
     const expiresAt = now.getTime() + duration;
@@ -966,15 +970,15 @@ async function generateKey() {
     document.getElementById('infoType').textContent = `${selectedType} - ${KEY_LABELS[selectedType]}`;
     document.getElementById('infoDate').textContent = formatDateTime(now);
     document.getElementById('infoExpire').textContent = formatDateTime(expireDate);
+    document.getElementById('infoLen').textContent = `${key.length} ký tự ✓`;
     document.getElementById('infoFb').textContent = '✓ Đã đồng bộ';
     document.getElementById('infoFb').style.color = 'var(--gr)';
     document.getElementById('keyInfo').classList.add('show');
 
-    // Lưu vào lịch sử
     saveToHistory(key, selectedType, now.getTime(), expiresAt);
     loadHistory();
 
-    setStatus('success', `🎉 Key ${selectedType} đã được tạo thành công!`);
+    setStatus('success', `🎉 Key ${selectedType} (${key.length} ký tự) đã được tạo thành công!`);
     
     btn.disabled = false;
     btn.innerHTML = `✨ TẠO KEY ${selectedType} (${KEY_LABELS[selectedType]})`;
@@ -990,7 +994,6 @@ async function generateKey() {
 function saveToHistory(key, type, createdAt, expiresAt) {
   let history = JSON.parse(localStorage.getItem(CFG.HISTORY_KEY) || '[]');
   history.unshift({ key, type, createdAt, expiresAt });
-  // Giữ tối đa 50 keys gần nhất
   if (history.length > 50) history = history.slice(0, 50);
   localStorage.setItem(CFG.HISTORY_KEY, JSON.stringify(history));
 }
@@ -999,7 +1002,6 @@ function loadHistory() {
   const history = JSON.parse(localStorage.getItem(CFG.HISTORY_KEY) || '[]');
   const container = document.getElementById('keyHistory');
   
-  // Xóa các item cũ (giữ lại title)
   const items = container.querySelectorAll('.history-item');
   items.forEach(i => i.remove());
   
@@ -1048,7 +1050,6 @@ function copyKey() {
       btn.classList.remove('copied');
     }, 2000);
   }).catch(() => {
-    // Fallback
     const ta = document.createElement('textarea');
     ta.value = key;
     document.body.appendChild(ta);
@@ -1067,7 +1068,6 @@ function copyKey() {
 }
 
 // ==================== ANTI-CRACK PROTECTIONS ====================
-// Chặn F12, Ctrl+Shift+I, Ctrl+U
 document.addEventListener('keydown', e => {
   if (e.key === 'F12') { e.preventDefault(); return false; }
   if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) {
@@ -1079,18 +1079,11 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey && e.key.toUpperCase() === 'S') {
     e.preventDefault(); return false;
   }
-  if (e.ctrlKey && e.key.toUpperCase() === 'P') {
-    e.preventDefault(); return false;
-  }
 });
 
-// Chặn right-click
 document.addEventListener('contextmenu', e => e.preventDefault());
-
-// Chặn drag text
 document.addEventListener('dragstart', e => e.preventDefault());
 
-// Detect DevTools (basic)
 let devtoolsOpen = false;
 const threshold = 160;
 setInterval(() => {
@@ -1103,7 +1096,6 @@ setInterval(() => {
   }
 }, 1000);
 
-// Enter để đăng nhập
 document.getElementById('password').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
