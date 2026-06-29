@@ -969,7 +969,7 @@ function updateGenBtn() {
   }
 }
 
-// ==================== KEY GENERATION (18 CHARS) ====================
+// ==================== KEY GENERATION (18 CHARS - FIXED) ====================
 function randomChars(len) {
   const arr = new Uint8Array(len);
   crypto.getRandomValues(arr);
@@ -990,11 +990,22 @@ function formatDateTime(d) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+// ✅ ĐÃ SỬA: Tính độ dài randomPart động dựa trên độ dài của type
+// Format: {type}-{DDMMYY}-{randomPart} = 18 ký tự
+// → randomLen = 18 - type.length - 1 (dấu -) - 6 (date DDMMYY) - 1 (dấu -)
+// → randomLen = 10 - type.length
 function generateKeyString(type) {
   const now = new Date();
-  const dateStr = formatDate(now);
-  const randomPart = randomChars(8);
+  const dateStr = formatDate(now); // luôn 6 ký tự (DDMMYY)
   
+  // Tính độ dài phần random để đảm bảo tổng = 18 ký tự
+  const randomLen = CFG.KEY_LEN - type.length - 1 - 6 - 1; // = 10 - type.length
+  
+  if (randomLen <= 0) {
+    throw new Error(`Type "${type}" quá dài, không thể tạo key 18 ký tự!`);
+  }
+  
+  const randomPart = randomChars(randomLen);
   const key = `${type}-${dateStr}-${randomPart}`;
   
   if (key.length !== CFG.KEY_LEN) {
