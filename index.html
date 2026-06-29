@@ -434,16 +434,46 @@ body::before {
 
 .key-history.show { display: flex; }
 
+.key-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
 .key-history-title {
   font-size: 12px;
   color: var(--tx2);
   letter-spacing: 1px;
   text-transform: uppercase;
   font-weight: 700;
-  margin-bottom: 4px;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.btn-cleanup {
+  padding: 6px 12px;
+  background: rgba(239,68,68,.12);
+  border: 1px solid rgba(239,68,68,.35);
+  border-radius: 8px;
+  color: var(--re);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-cleanup:hover {
+  background: rgba(239,68,68,.25);
+  transform: translateY(-1px);
+}
+
+.btn-cleanup:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .history-item {
@@ -455,6 +485,17 @@ body::before {
   border: 1px solid var(--bd);
   border-radius: 10px;
   font-size: 12px;
+  transition: all 0.2s;
+}
+
+.history-item:hover {
+  border-color: var(--bd2);
+}
+
+.history-item.expired {
+  opacity: 0.6;
+  border-color: rgba(239,68,68,.3);
+  background: rgba(239,68,68,.05);
 }
 
 .history-key {
@@ -463,6 +504,7 @@ body::before {
   color: var(--or);
   flex: 1;
   word-break: break-all;
+  font-size: 11px;
 }
 
 .history-badge {
@@ -479,10 +521,43 @@ body::before {
 .history-badge.week { background: rgba(249,115,22,.15); color: var(--or); }
 .history-badge.month { background: rgba(168,85,247,.15); color: #a855f7; }
 
-.history-date {
-  font-size: 10px;
-  color: var(--tx3);
+.status-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.status-badge.active { background: rgba(34,197,94,.15); color: var(--gr); }
+.status-badge.expired { background: rgba(239,68,68,.15); color: var(--re); }
+.status-badge.used { background: rgba(251,191,36,.15); color: var(--go); }
+
+.btn-delete {
+  padding: 6px 10px;
+  background: rgba(239,68,68,.12);
+  border: 1px solid rgba(239,68,68,.35);
+  border-radius: 8px;
+  color: var(--re);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+}
+
+.btn-delete:hover {
+  background: rgba(239,68,68,.25);
+  transform: translateY(-1px);
+}
+
+.btn-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .key-len-badge {
@@ -564,6 +639,7 @@ body::before {
   .card { padding: 18px; }
   .key-types { grid-template-columns: repeat(2, 1fr); }
   .key-result-text { font-size: 13px; }
+  .history-key { font-size: 10px; }
 }
 </style>
 </head>
@@ -584,7 +660,7 @@ body::before {
       ADMIN PANEL · SECURE ACCESS
     </div>
     <div class="title">🔐 Key Generator</div>
-    <div class="subtitle">⚡ 18 CHARS KEY · ANTI-CRACK · AUTO GENERATE ⚡</div>
+    <div class="subtitle">⚡ 18 CHARS KEY · ANTI-CRACK · AUTO CLEANUP ⚡</div>
   </div>
 
   <div class="card">
@@ -689,7 +765,10 @@ body::before {
       </div>
 
       <div class="key-history" id="keyHistory">
-        <div class="key-history-title">📜 LỊCH SỬ KEY ĐÃ TẠO</div>
+        <div class="key-history-header">
+          <div class="key-history-title">📜 LỊCH SỬ KEY ĐÃ TẠO</div>
+          <button class="btn-cleanup" id="btnCleanup" onclick="cleanupExpiredKeys()">🧹 Dọn key hết hạn</button>
+        </div>
       </div>
     </div>
   </div>
@@ -697,7 +776,7 @@ body::before {
   <div class="badges">
     <div class="badge"><div class="bdot g"></div>SHA-256 Encrypted</div>
     <div class="badge"><div class="bdot o"></div>18 Chars Format</div>
-    <div class="badge"><div class="bdot r"></div>Anti-Crack</div>
+    <div class="badge"><div class="bdot r"></div>Auto Cleanup</div>
     <div class="badge"><div class="bdot b"></div>Firebase Sync</div>
   </div>
 
@@ -734,19 +813,14 @@ async function sha256(message) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Pre-computed hashes (không lưu plain text trong source)
-const AUTH_HASH = {
-  u: null, // sẽ tính khi init
-  p: null
-};
-
 // ==================== CẤU HÌNH KEY ====================
 const CFG = {
   KEY_CHARS: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789',
   SESSION_KEY: 'admin_session_token',
   SESSION_EXP: 'admin_session_exp',
   HISTORY_KEY: 'admin_key_history',
-  KEY_LEN: 18  // ← Độ dài cố định 18 ký tự
+  KEY_LEN: 18,
+  CLEANUP_INTERVAL: 60000 // 60 giây
 };
 
 const KEY_DURATIONS = {
@@ -764,6 +838,7 @@ const KEY_LABELS = {
 };
 
 let selectedType = null;
+let cleanupTimer = null;
 
 // ==================== UI HELPERS ====================
 function setStatus(type, msg) {
@@ -820,6 +895,7 @@ async function doLogin() {
         document.getElementById('adminPanel').classList.add('show');
         clearStatus();
         loadHistory();
+        startAutoCleanup();
       }, 800);
     } else {
       setStatus('error', '❌ Sai tên đăng nhập hoặc mật khẩu!');
@@ -846,6 +922,11 @@ function doLogout() {
   selectedType = null;
   document.querySelectorAll('.key-type-btn').forEach(b => b.classList.remove('active'));
   updateGenBtn();
+  
+  if (cleanupTimer) {
+    clearInterval(cleanupTimer);
+    cleanupTimer = null;
+  }
 }
 
 function checkSession() {
@@ -856,6 +937,7 @@ function checkSession() {
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('adminPanel').classList.add('show');
     loadHistory();
+    startAutoCleanup();
     return true;
   }
   
@@ -908,21 +990,13 @@ function formatDateTime(d) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-/**
- * Tạo key đúng 18 ký tự
- * Format: [TYPE(2)]-[DDMMYY(6)]-[RANDOM(8)]
- * Tổng: 2 + 1 + 6 + 1 + 8 = 18 ký tự
- * Ví dụ: 1N-290626-A3F8B2C4
- */
 function generateKeyString(type) {
   const now = new Date();
-  const dateStr = formatDate(now);      // 6 ký tự: DDMMYY
-  const randomPart = randomChars(8);    // 8 ký tự random
+  const dateStr = formatDate(now);
+  const randomPart = randomChars(8);
   
-  // TYPE (2) + "-" (1) + DATE (6) + "-" (1) + RANDOM (8) = 18
   const key = `${type}-${dateStr}-${randomPart}`;
   
-  // Verify độ dài (debug)
   if (key.length !== CFG.KEY_LEN) {
     console.error('KEY LENGTH ERROR:', key.length, key);
     throw new Error('Key length mismatch!');
@@ -944,13 +1018,12 @@ async function generateKey() {
 
   try {
     const now = new Date();
-    const key = generateKeyString(selectedType);  // ← Luôn đúng 18 ký tự
+    const key = generateKeyString(selectedType);
     
     const duration = KEY_DURATIONS[selectedType];
     const expiresAt = now.getTime() + duration;
     const expireDate = new Date(expiresAt);
 
-    // Lưu vào Firebase
     await fbDb.ref('keys/' + key).set({
       type: selectedType,
       active: true,
@@ -962,11 +1035,9 @@ async function generateKey() {
       usedAt: 0
     });
 
-    // Hiển thị key
     document.getElementById('keyText').textContent = key;
     document.getElementById('keyResult').classList.add('show');
     
-    // Hiển thị thông tin
     document.getElementById('infoType').textContent = `${selectedType} - ${KEY_LABELS[selectedType]}`;
     document.getElementById('infoDate').textContent = formatDateTime(now);
     document.getElementById('infoExpire').textContent = formatDateTime(expireDate);
@@ -990,12 +1061,19 @@ async function generateKey() {
   }
 }
 
-// ==================== HISTORY ====================
+// ==================== HISTORY & CLEANUP ====================
 function saveToHistory(key, type, createdAt, expiresAt) {
   let history = JSON.parse(localStorage.getItem(CFG.HISTORY_KEY) || '[]');
   history.unshift({ key, type, createdAt, expiresAt });
-  if (history.length > 50) history = history.slice(0, 50);
+  if (history.length > 100) history = history.slice(0, 100);
   localStorage.setItem(CFG.HISTORY_KEY, JSON.stringify(history));
+}
+
+function getKeyStatus(item) {
+  const now = Date.now();
+  if (item.used) return 'used';
+  if (now >= item.expiresAt) return 'expired';
+  return 'active';
 }
 
 function loadHistory() {
@@ -1012,9 +1090,14 @@ function loadHistory() {
   
   container.classList.add('show');
   
-  history.slice(0, 10).forEach(item => {
+  history.slice(0, 20).forEach(item => {
     const div = document.createElement('div');
     div.className = 'history-item';
+    
+    const status = getKeyStatus(item);
+    if (status === 'expired') {
+      div.classList.add('expired');
+    }
     
     const badgeClass = {
       '1H': 'hour',
@@ -1023,6 +1106,12 @@ function loadHistory() {
       '30N': 'month'
     }[item.type] || 'day';
     
+    const statusText = {
+      'active': '🟢 Còn hạn',
+      'expired': '🔴 Hết hạn',
+      'used': '🟡 Đã dùng'
+    }[status];
+    
     const createdDate = new Date(item.createdAt);
     const pad = n => String(n).padStart(2, '0');
     const dateStr = `${pad(createdDate.getDate())}/${pad(createdDate.getMonth() + 1)}`;
@@ -1030,10 +1119,106 @@ function loadHistory() {
     div.innerHTML = `
       <span class="history-key">${item.key}</span>
       <span class="history-badge ${badgeClass}">${item.type}</span>
-      <span class="history-date">${dateStr}</span>
+      <span class="status-badge ${status}">${statusText}</span>
+      <button class="btn-delete" onclick="deleteKey('${item.key}')">🗑️ Xóa</button>
     `;
     container.appendChild(div);
   });
+}
+
+async function deleteKey(key) {
+  if (!confirm(`Bạn có chắc muốn xóa key:\n\n${key}\n\nKey sẽ bị xóa khỏi cả Firebase và lịch sử!`)) {
+    return;
+  }
+
+  setStatus('loading', `Đang xóa key ${key}...`);
+
+  try {
+    // Xóa khỏi Firebase
+    await fbDb.ref('keys/' + key).remove();
+    
+    // Xóa khỏi localStorage history
+    let history = JSON.parse(localStorage.getItem(CFG.HISTORY_KEY) || '[]');
+    history = history.filter(item => item.key !== key);
+    localStorage.setItem(CFG.HISTORY_KEY, JSON.stringify(history));
+    
+    loadHistory();
+    setStatus('success', `✅ Đã xóa key ${key} thành công!`);
+  } catch (e) {
+    setStatus('error', '❌ Lỗi xóa key: ' + e.message);
+  }
+}
+
+async function cleanupExpiredKeys() {
+  const btn = document.getElementById('btnCleanup');
+  btn.disabled = true;
+  btn.textContent = '⏳ Đang dọn...';
+  
+  setStatus('loading', 'Đang quét và xóa key hết hạn...');
+
+  try {
+    const history = JSON.parse(localStorage.getItem(CFG.HISTORY_KEY) || '[]');
+    const now = Date.now();
+    const expiredKeys = history.filter(item => now >= item.expiresAt);
+    
+    if (expiredKeys.length === 0) {
+      setStatus('info', 'ℹ️ Không có key nào hết hạn!');
+      btn.disabled = false;
+      btn.textContent = '🧹 Dọn key hết hạn';
+      return;
+    }
+
+    let deletedCount = 0;
+    for (const item of expiredKeys) {
+      try {
+        await fbDb.ref('keys/' + item.key).remove();
+        deletedCount++;
+      } catch (e) {
+        console.error('Error deleting key:', item.key, e);
+      }
+    }
+    
+    // Cập nhật localStorage
+    const remainingKeys = history.filter(item => now < item.expiresAt);
+    localStorage.setItem(CFG.HISTORY_KEY, JSON.stringify(remainingKeys));
+    
+    loadHistory();
+    setStatus('success', `✅ Đã xóa ${deletedCount} key hết hạn!`);
+  } catch (e) {
+    setStatus('error', '❌ Lỗi dọn dẹp: ' + e.message);
+  }
+  
+  btn.disabled = false;
+  btn.textContent = '🧹 Dọn key hết hạn';
+}
+
+function startAutoCleanup() {
+  if (cleanupTimer) {
+    clearInterval(cleanupTimer);
+  }
+  
+  // Chạy cleanup mỗi 60 giây
+  cleanupTimer = setInterval(async () => {
+    const history = JSON.parse(localStorage.getItem(CFG.HISTORY_KEY) || '[]');
+    const now = Date.now();
+    const expiredKeys = history.filter(item => now >= item.expiresAt);
+    
+    if (expiredKeys.length > 0) {
+      console.log(`Auto-cleanup: Deleting ${expiredKeys.length} expired keys...`);
+      
+      for (const item of expiredKeys) {
+        try {
+          await fbDb.ref('keys/' + item.key).remove();
+        } catch (e) {
+          console.error('Auto-cleanup error:', item.key, e);
+        }
+      }
+      
+      const remainingKeys = history.filter(item => now < item.expiresAt);
+      localStorage.setItem(CFG.HISTORY_KEY, JSON.stringify(remainingKeys));
+      loadHistory();
+    }
+  }, CFG.CLEANUP_INTERVAL);
 }
 
 // ==================== COPY KEY ====================
